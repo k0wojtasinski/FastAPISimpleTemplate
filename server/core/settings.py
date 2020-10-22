@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     crypto_algorithm = "HS256"
     access_token_expire_seconds = 1800
     database_url = "sqlite://"
+    cors_allow_origins = "*"
+    cors_allow_headers = "*"
+    cors_allow_methods = "*"
 
     class Config:
         case_sensitive = False
