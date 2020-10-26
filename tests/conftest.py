@@ -9,7 +9,7 @@ from sqlalchemy.pool import StaticPool
 from server import app
 from server.core.database import get_session
 from server.core.models import Base
-from server.core.utils import generate_user_create_dict, UserCreate
+from server.core.utils import generate_user_create_dict, create_admin
 
 
 @pytest.fixture
@@ -30,6 +30,14 @@ def test_client() -> TestClient:
             session.close()
 
     app.dependency_overrides[get_session] = _override_get_session
+
+    # create first admin user
+    create_admin(
+        username="admin",
+        password="password",
+        email="email",
+        session=TestingSessionLocal(),
+    )
 
     return TestClient(app)
 

@@ -128,6 +128,16 @@ def get_current_active_user(
     return current_user
 
 
+def get_current_admin_user(
+    current_user: models.User = Depends(get_current_active_user),
+) -> models.User:
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="User is not admin"
+        )
+    return current_user
+
+
 def get_token(
     session: Session, form_data: OAuth2PasswordRequestForm = Depends()
 ) -> schemas.Token:

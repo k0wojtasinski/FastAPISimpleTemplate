@@ -1,8 +1,11 @@
 """ module with unit tests for User endpoints """
+""" Please note that test environment has admin user as a first user (see conftest.py) """
 
 from fastapi import status
 
 from tests import get_auth_credentials
+
+from server.core.utils import create_admin
 
 
 def test_user_can_sign_up(test_client, user_json):
@@ -18,7 +21,7 @@ def test_user_can_sign_up(test_client, user_json):
     list_users = test_client.get("/users", headers=headers)
 
     assert list_users.status_code == status.HTTP_200_OK
-    assert list_users.json()[0] == sign_up_user_response
+    assert list_users.json()[1] == sign_up_user_response
 
 
 def test_user_cannot_sign_up_with_already_used_username(test_client, user_json):
@@ -75,7 +78,7 @@ def test_user_can_change_its_fields(test_client, user_json):
     assert current_user.status_code == status.HTTP_200_OK
     assert current_user.json()["username"] == modified_user["username"]
     assert current_user.json()["email"] == modified_user["email"]
-    assert current_user.json()["id"] == 1
+    assert current_user.json()["id"] == 2
 
 
 def test_user_can_change_its_password(test_client, user_json):
@@ -122,7 +125,7 @@ def test_user_can_delete_itself(test_client, user_json):
 
     headers = get_auth_credentials(test_client, user_json)
 
-    assert len(test_client.get("/users", headers=headers).json()) == 2
+    assert len(test_client.get("/users", headers=headers).json()) == 3
 
     delete_first_user = test_client.delete("/users/me", headers=headers)
 
@@ -130,5 +133,5 @@ def test_user_can_delete_itself(test_client, user_json):
 
     headers = get_auth_credentials(test_client, second_user)
 
-    assert len(test_client.get("/users", headers=headers).json()) == 1
-    assert test_client.get("/users", headers=headers).json()[0]["id"] == 2
+    assert len(test_client.get("/users", headers=headers).json()) == 2
+    assert test_client.get("/users", headers=headers).json()[1]["id"] == 3

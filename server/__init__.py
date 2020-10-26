@@ -5,6 +5,7 @@ from server.routes import users
 from server.core.database import engine
 from server.core.models import Base
 from server.core.settings import settings
+from server.core.utils import create_admin
 
 Base.metadata.create_all(bind=engine)
 
@@ -18,3 +19,10 @@ app.add_middleware(
 )
 
 app.include_router(users.router)
+
+if settings.admin_username:
+    create_admin(
+        username=settings.admin_username,
+        password=settings.admin_password,
+        email=settings.admin_email,
+    )

@@ -1,4 +1,6 @@
 """ module with pydantic BaseSettings object """
+from typing import Optional
+
 from pydantic import BaseSettings
 
 
@@ -12,6 +14,9 @@ class Settings(BaseSettings):
     cors_allow_origins = "*"
     cors_allow_headers = "*"
     cors_allow_methods = "*"
+    admin_username: Optional[str]
+    admin_password: Optional[str]
+    admin_email: Optional[str]
 
     class Config:
         case_sensitive = False

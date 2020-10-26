@@ -13,7 +13,11 @@ router = APIRouter()
 
 def convert_user_to_schema(user: models.User) -> schemas.User:
     return schemas.User(
-        id=user.id, username=user.username, email=user.email, is_active=user.is_active
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        is_active=user.is_active,
+        is_admin=user.is_admin,
     )
 
 
