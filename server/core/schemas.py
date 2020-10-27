@@ -28,7 +28,8 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    username: Optional[str]
+    exp: Optional[int]
 
 
 class PasswordUpdate(BaseModel):
