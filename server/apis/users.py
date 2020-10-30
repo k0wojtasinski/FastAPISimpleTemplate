@@ -99,21 +99,16 @@ def get_current_user(
     session: Session = Depends(get_session),
     token: str = Depends(security.oauth2_scheme),
 ) -> models.User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
 
     try:
         token_data = security.process_token(token)
     except JWTError:
-        raise credentials_exception
+        raise security.CredentialsException("Could not validate credentials")
 
     user = read_user_by_username(session, username=token_data.username)
 
     if not user:
-        raise credentials_exception
+        raise security.CredentialsException("Could not validate credentials")
 
     return user
 
@@ -144,9 +139,6 @@ def get_token(
     user = authenticate_user(session, form_data.username, form_data.password)
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise security.CredentialsException("Incorrect username or password")
+
     return security.get_token(user)
