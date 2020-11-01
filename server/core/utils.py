@@ -8,8 +8,8 @@ from server.core.schemas import UserCreate
 from server.core.database import SessionLocal
 from server.apis.users import (
     create_admin_user,
-    read_user_by_email,
-    read_user_by_username,
+    get_user_by_email,
+    get_user_by_username,
 )
 
 
@@ -45,7 +45,7 @@ def create_admin(
     if not session:
         session = SessionLocal()
 
-    if not read_user_by_username(session, username) and not read_user_by_email(
+    if not get_user_by_username(session, username) and not get_user_by_email(
         session, email
     ):
         create_admin_user(
