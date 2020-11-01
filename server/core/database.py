@@ -7,7 +7,16 @@ from server.core.settings import settings
 
 
 def prepare_engine(database_url: str):
-    if database_url.startswith("sqlite"):
+    """It prepares engine for database sessions.
+        It provides support for memory-based sqlite database (url=sqlite://)
+
+    Args:
+        database_url (str): url of database in a form supported by SQLAlchemy
+
+    Returns:
+        engine: SQLAlchemy engine
+    """
+    if database_url == "sqlite://":
         return create_engine(
             database_url,
             connect_args={"check_same_thread": False},
@@ -16,14 +25,19 @@ def prepare_engine(database_url: str):
     return create_engine(database_url)
 
 
-database_url = settings.database_url
+DATABASE_URL = settings.database_url
 
-engine = prepare_engine(database_url)
+engine = prepare_engine(DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def get_session():
+    """It yields new session to connect to database.
+
+    Yields:
+        session: SQLAlchemy session to connect to database
+    """
     session = SessionLocal()
     try:
         yield session

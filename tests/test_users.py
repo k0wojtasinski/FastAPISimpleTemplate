@@ -1,11 +1,9 @@
-""" module with unit tests for User endpoints """
-""" Please note that test environment has admin user as a first user (see conftest.py) """
+""" module with unit tests for User endpoints
+    Please note that test environment has admin user as a first user (see conftest.py) """
 
 from fastapi import status
 
 from tests import get_auth_credentials
-
-from server.core.utils import create_admin
 
 
 def test_user_can_sign_up(test_client, user_json):
