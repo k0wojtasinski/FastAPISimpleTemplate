@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from server.core.settings import settings
 
+CONNECTION_STRING = settings.database_connection_string
+
 
 def prepare_engine(database_url: str):
     """It prepares engine for database sessions.
@@ -18,16 +20,14 @@ def prepare_engine(database_url: str):
     """
     if database_url == "sqlite://":
         return create_engine(
-            database_url,
+            CONNECTION_STRING,
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
         )
-    return create_engine(database_url)
+    return create_engine(CONNECTION_STRING)
 
 
-DATABASE_URL = settings.database_url
-
-engine = prepare_engine(DATABASE_URL)
+engine = prepare_engine(CONNECTION_STRING)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     admin_username: Optional[str]
     admin_password: Optional[str]
     admin_email: Optional[str]
+    database_connection_string = "sqlite://"
 
     class Config:
         """ extra configuration for BaseSettings """
