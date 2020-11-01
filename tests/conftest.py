@@ -35,7 +35,7 @@ def test_client() -> TestClient:
     create_admin(
         username="admin",
         password="password",
-        email="email",
+        email="admin_user@example.com",
         session=TestingSessionLocal(),
     )
 

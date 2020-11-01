@@ -1,14 +1,14 @@
 """ module with all the pydantic schemas """
 
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UserBase(BaseModel):
     """ base User schema. """
 
     username: str
-    email: str
+    email: EmailStr
 
 
 class UserCreate(UserBase):

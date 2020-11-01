@@ -61,7 +61,7 @@ def test_user_can_change_its_fields(test_client, user_json):
 
     modified_user = user_json.copy()
     modified_user["username"] = user_json["username"][::-1]
-    modified_user["email"] = user_json["email"][::-1]
+    modified_user["email"] = f'new{user_json["email"]}'
 
     change_username = test_client.put("/users/me", json=modified_user, headers=headers)
 
@@ -117,7 +117,7 @@ def test_user_can_delete_itself(test_client, user_json):
 
     second_user = user_json.copy()
     second_user["username"] = second_user["username"][::-1]
-    second_user["email"] = second_user["email"][::-1]
+    second_user["email"] = f'new{second_user["email"]}'
 
     test_client.post("/users/", json=second_user)
 
