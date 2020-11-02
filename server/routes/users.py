@@ -155,12 +155,12 @@ def post_token(
     Returns:
         schemas.Token: schema with token for given user
     """
-    return users_api.get_token(session, form_data)
+    return users_api.get_token(session=session, form_data=form_data)
 
 
 @router.put("/users/me")
 def update_user(
-    user: schemas.UserCreate,
+    updated_user: schemas.UserCreate,
     session: Session = Depends(get_session),
     current_user: models.User = Depends(users_api.get_current_active_user),
 ) -> schemas.User:
@@ -168,7 +168,7 @@ def update_user(
 
 
     Args:
-        user (schemas.UserCreate): schema to update user
+        updated_user (schemas.UserCreate): schema to update user
         session (Session): connection to database
         current_user (models.User): model of current user, must be authorized!
 
@@ -176,7 +176,9 @@ def update_user(
         schemas.User: schema of updated user
     """
 
-    return users_api.update_user(user, session, current_user)
+    return users_api.update_user(
+        session=session, current_user=current_user, updated_user=updated_user
+    )
 
 
 @router.patch("/users/password")
@@ -195,7 +197,9 @@ def update_password(
     Returns:
         Response: response with 204 code when update is successful
     """
-    users_api.update_password(password, session, current_user)
+    users_api.update_password(
+        session=session, current_user=current_user, new_password=password
+    )
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -214,6 +218,6 @@ def delete_user(
     Returns:
         Response: response with 204 code when update is successful
     """
-    users_api.delete_user(session, current_user)
+    users_api.delete_user(session=session, current_user=current_user)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

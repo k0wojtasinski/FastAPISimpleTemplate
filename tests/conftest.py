@@ -13,6 +13,25 @@ from server.core.utils import generate_user_create_dict, create_admin
 
 
 @pytest.fixture
+def test_session():
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    Base.metadata.create_all(bind=engine)
+
+    session = TestingSessionLocal()
+
+    try:
+        session = TestingSessionLocal()
+        yield session
+    finally:
+        session.close()
+
+
+@pytest.fixture
 def test_client() -> TestClient:
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool

@@ -111,14 +111,14 @@ def create_admin_user(session: Session, user: schemas.UserCreate) -> models.User
 
 
 def update_user(
-    updated_user: schemas.UserBase, session: Session, current_user: models.User
+    session: Session, current_user: models.User, updated_user: schemas.UserBase
 ) -> models.User:
     """it updates current user based on provided schema (email, username).
 
     Args:
-        user (schemas.UserBase): schema with updated values (email, username)
         session (Session): connection to database
         current_user (models.User): user which will be updated
+        user (schemas.UserBase): schema with updated values (email, username)
 
     Returns:
         models.User: updated model
@@ -134,7 +134,7 @@ def update_user(
 
 
 def update_password(
-    new_password: schemas.PasswordUpdate, session: Session, current_user: models.User
+    session: Session, current_user: models.User, new_password: schemas.PasswordUpdate
 ) -> models.User:
     """it updates user's password.
 
@@ -143,9 +143,9 @@ def update_password(
         Note, that it uses dedicated schema: PasswordUpdate
 
     Args:
-        new_password (schemas.PasswordUpdate): schema with new value for password
         session (Session): connection to database
         current_user (models.User): provided model
+        new_password (schemas.PasswordUpdate): schema with new value for password
 
     Raises:
         HTTPException: if given password is set
