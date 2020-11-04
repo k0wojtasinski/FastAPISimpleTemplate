@@ -1,9 +1,8 @@
-""" module with all the SQLAlchemy models """
+""" module with all the users models """
 
 from sqlalchemy import Boolean, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from server.models import Base
 
 
 class User(Base):

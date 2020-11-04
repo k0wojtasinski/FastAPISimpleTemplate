@@ -7,11 +7,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import JWTError
 
-from server.core import models, schemas, security
+from server.models.users import User
+from server.schemas.users import PasswordUpdate, Token, UserBase, UserCreate
+from server.core import security
 from server.core.database import get_session
 
 
-def get_user(session: Session, user_id: int) -> Optional[models.User]:
+def get_user(session: Session, user_id: int) -> Optional[User]:
     """it gets user by user's id.
 
     Args:
@@ -19,12 +21,12 @@ def get_user(session: Session, user_id: int) -> Optional[models.User]:
         user_id (int): id of user
 
     Returns:
-        models.User: model with given id
+        User: model with given id
     """
-    return session.query(models.User).filter(models.User.id == user_id).first()
+    return session.query(User).filter(User.id == user_id).first()
 
 
-def get_user_by_username(session: Session, username: str) -> Optional[models.User]:
+def get_user_by_username(session: Session, username: str) -> Optional[User]:
     """it gets user by username.
 
     Args:
@@ -32,12 +34,12 @@ def get_user_by_username(session: Session, username: str) -> Optional[models.Use
         username (str): username
 
     Returns:
-        models.User: model with given username
+        User: model with given username
     """
-    return session.query(models.User).filter(models.User.username == username).first()
+    return session.query(User).filter(User.username == username).first()
 
 
-def get_user_by_email(session: Session, email: str) -> Optional[models.User]:
+def get_user_by_email(session: Session, email: str) -> Optional[User]:
     """it gets user by email.
 
     Args:
@@ -45,12 +47,12 @@ def get_user_by_email(session: Session, email: str) -> Optional[models.User]:
         email (str): email of user
 
     Returns:
-        models.User: model with given email
+        User: model with given email
     """
-    return session.query(models.User).filter(models.User.email == email).first()
+    return session.query(User).filter(User.email == email).first()
 
 
-def get_users(session: Session, skip: int = 0, limit: int = 100) -> list[models.User]:
+def get_users(session: Session, skip: int = 0, limit: int = 100) -> list[User]:
     """it gets list of users, supports skip and limit parameters.
 
     Args:
@@ -59,24 +61,24 @@ def get_users(session: Session, skip: int = 0, limit: int = 100) -> list[models.
         limit (int): parameter to limit read users to n. Defaults to 100
 
     Returns:
-        list[models.User]: list of users
+        list[User]: list of users
     """
-    return session.query(models.User).offset(skip).limit(limit).all()
+    return session.query(User).offset(skip).limit(limit).all()
 
 
-def create_user(session: Session, user: schemas.UserCreate) -> models.User:
+def create_user(session: Session, user: UserCreate) -> User:
     """it creates new user based on provided UserCreate schema.
 
         it assumes that given user was not created before (responsbility of route).
 
     Args:
         session (Session): connection to database
-        user (schemas.UserCreate): schema of user to be created
+        user (UserCreate): schema of user to be created
 
     Returns:
-        models.User: created model
+        User: created model
     """
-    db_user = models.User(
+    db_user = User(
         username=user.username,
         email=user.email,
         hashed_password=security.get_password_hash(user.password),
@@ -89,17 +91,17 @@ def create_user(session: Session, user: schemas.UserCreate) -> models.User:
     return db_user
 
 
-def create_admin_user(session: Session, user: schemas.UserCreate) -> models.User:
+def create_admin_user(session: Session, user: UserCreate) -> User:
     """it creates admin user based on provided schema.
 
         it assumes that given user was not created before (responsibility of route).
 
     Args:
         session (Session): connection to database
-        user (schemas.UserCreate): schema of admin user to be created
+        user (UserCreate): schema of admin user to be created
 
     Returns:
-        models.User: created model
+        User: created model
     """
     user = create_user(session, user)
     user.is_admin = True
@@ -111,17 +113,19 @@ def create_admin_user(session: Session, user: schemas.UserCreate) -> models.User
 
 
 def update_user(
-    session: Session, current_user: models.User, updated_user: schemas.UserBase
-) -> models.User:
+    session: Session,
+    current_user: User,
+    updated_user: UserBase,
+) -> User:
     """it updates current user based on provided schema (email, username).
 
     Args:
         session (Session): connection to database
-        current_user (models.User): user which will be updated
-        user (schemas.UserBase): schema with updated values (email, username)
+        current_user (User): user which will be updated
+        user (UserBase): schema with updated values (email, username)
 
     Returns:
-        models.User: updated model
+        User: updated model
     """
 
     current_user.username = updated_user.username
@@ -134,8 +138,10 @@ def update_user(
 
 
 def update_password(
-    session: Session, current_user: models.User, new_password: schemas.PasswordUpdate
-) -> models.User:
+    session: Session,
+    current_user: User,
+    new_password: PasswordUpdate,
+) -> User:
     """it updates user's password.
 
         it fails if given password is already set.
@@ -144,14 +150,14 @@ def update_password(
 
     Args:
         session (Session): connection to database
-        current_user (models.User): provided model
-        new_password (schemas.PasswordUpdate): schema with new value for password
+        current_user (User): provided model
+        new_password (PasswordUpdate): schema with new value for password
 
     Raises:
         HTTPException: if given password is set
 
     Returns:
-        models.User: model with updated password
+        User: model with updated password
     """
     password = new_password.password
 
@@ -166,18 +172,18 @@ def update_password(
     return current_user
 
 
-def delete_user(session: Session, current_user: models.User):
+def delete_user(session: Session, current_user: User):
     """it deletes given user.
 
     Args:
         session (Session): connection to database
-        current_user (models.User): provided model
+        current_user (User): provided model
     """
     session.delete(current_user)
     session.commit()
 
 
-def authenticate_user(session: Session, username: str, password: str) -> models.User:
+def authenticate_user(session: Session, username: str, password: str) -> User:
     """it authenticates user based on given username and password
 
     Args:
@@ -186,7 +192,7 @@ def authenticate_user(session: Session, username: str, password: str) -> models.
         password (str): password of user
 
     Returns:
-        models.User: model with given username
+        User: model with given username
     """
     user = get_user_by_username(session, username)
 
@@ -202,7 +208,7 @@ def authenticate_user(session: Session, username: str, password: str) -> models.
 def get_current_user(
     session: Session = Depends(get_session),
     token: str = Depends(security.oauth2_scheme),
-) -> models.User:
+) -> User:
     """it gets user based on provided token.
 
     Args:
@@ -213,7 +219,7 @@ def get_current_user(
         security.CredentialsException: when user provided wrong credentials
 
     Returns:
-        models.User: provided model
+        User: provided model
     """
 
     try:
@@ -232,20 +238,20 @@ def get_current_user(
 
 
 def get_current_active_user(
-    current_user: models.User = Depends(get_current_user),
-) -> models.User:
+    current_user: User = Depends(get_current_user),
+) -> User:
     """it gets active user.
 
         if user is not active, it raises HTTP exception
 
     Args:
-        current_user (models.User): model to be checked
+        current_user (User): model to be checked
 
     Raises:
         HTTPException: when provided user is not active
 
     Returns:
-        models.User: provided model
+        User: provided model
     """
     if not current_user.is_active:
         raise HTTPException(
@@ -255,20 +261,20 @@ def get_current_active_user(
 
 
 def get_current_admin_user(
-    current_user: models.User = Depends(get_current_active_user),
-) -> models.User:
+    current_user: User = Depends(get_current_active_user),
+) -> User:
     """it gets active user with admin priviliges.
 
         if provided user is not admin, it raises HTTP exception
 
     Args:
-        current_user (models.User): provided model
+        current_user (User): provided model
 
     Raises:
         HTTPException: when given user does not have admin priviliges
 
     Returns:
-        models.User: provided model
+        User: provided model
     """
     if not current_user.is_admin:
         raise HTTPException(
@@ -279,7 +285,7 @@ def get_current_admin_user(
 
 def get_token(
     session: Session, form_data: OAuth2PasswordRequestForm = Depends()
-) -> schemas.Token:
+) -> Token:
     """it gets token based on given form data with username and password.
 
         it will try to sign in user based on provided credentials.
@@ -296,7 +302,7 @@ def get_token(
         security.CredentialsException: when provided form data is incorrect
 
     Returns:
-        schemas.Token: token with authorized user
+        Token: token with authorized user
     """
     user = authenticate_user(session, form_data.username, form_data.password)
 

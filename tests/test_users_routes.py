@@ -1,4 +1,4 @@
-""" module with unit tests for User endpoints
+""" module with unit tests for users endpoints
     Please note that test environment has admin user as a first user (see conftest.py) """
 
 from fastapi import status

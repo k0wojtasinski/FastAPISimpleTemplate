@@ -3,7 +3,7 @@ import os
 
 from fastapi.testclient import TestClient
 
-from server.core.schemas import UserCreate
+from server.schemas.users import UserCreate
 
 sys.path.append(os.path.abspath("../server"))
 

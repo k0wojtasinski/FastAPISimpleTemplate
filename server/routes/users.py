@@ -4,23 +4,25 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from server.core import models, schemas, security
+from server.models.users import User
+from server.schemas.users import PasswordUpdate, Token, UserSchema, UserCreate
+from server.core import security
 from server.core.database import get_session
 from server.apis import users as users_api
 
 router = APIRouter()
 
 
-def convert_user_to_schema(user: models.User) -> schemas.User:
+def convert_user_to_schema(user: User) -> UserSchema:
     """it converts user model into schema of user.
 
     Args:
-        user (models.User): model to be converted
+        user (User): model to be converted
 
     Returns:
-        schemas.User: converted schema
+        UserSchema: converted schema
     """
-    return schemas.User(
+    return UserSchema(
         id=user.id,
         username=user.username,
         email=user.email,
@@ -30,20 +32,18 @@ def convert_user_to_schema(user: models.User) -> schemas.User:
 
 
 @router.post("/users/")
-def post_user(
-    user: schemas.UserCreate, session: Session = Depends(get_session)
-) -> schemas.User:
+def post_user(user: UserCreate, session: Session = Depends(get_session)) -> UserSchema:
     """this is route to create new user.
 
     Args:
-        user (schemas.UserCreate): schema of user to be created
+        user (UserCreate): schema of user to be created
         session (Session): connection to database
 
     Raises:
         HTTPException: when user with given username or password already exists
 
     Returns:
-        schemas.User: schema of user
+        UserSchema: schema of user
     """
     db_user = users_api.get_user_by_username(session=session, username=user.username)
 
@@ -70,8 +70,8 @@ def get_users(
     skip: int = 0,
     limit: int = 100,
     session: Session = Depends(get_session),
-    current_user: models.User = Depends(users_api.get_current_active_user),
-) -> list[schemas.User]:
+    current_user: User = Depends(users_api.get_current_active_user),
+) -> list[UserSchema]:
     """it is route to read list of users.
 
 
@@ -79,10 +79,10 @@ def get_users(
         skip (int): parameter to skip first n users. Defaults to 0
         limit (int): parameter to limit read users to n. Defaults to 100
         session (Session): connection to database
-        current_user (models.User): model of current user, must be authorized!
+        current_user (User): model of current user, must be authorized!
 
     Returns:
-        list[schemas.User]: list of users' schemas
+        list[UserSchema]: list of users' schemas
     """
     users = [
         convert_user_to_schema(user)
@@ -94,16 +94,16 @@ def get_users(
 @router.get("/users/me")
 def get_users_me(
     session=Depends(get_session),
-    current_user: models.User = Depends(users_api.get_current_active_user),
-) -> schemas.User:
+    current_user: User = Depends(users_api.get_current_active_user),
+) -> UserSchema:
     """it is route to get current user - user who authorizes call
 
     Args:
         session (Session): connection to database
-        current_user (models.User): model of current user, must be authorized!
+        current_user (User): model of current user, must be authorized!
 
     Returns:
-        schemas.User: schema of current user
+        UserSchema: schema of current user
     """
     return convert_user_to_schema(current_user)
 
@@ -112,8 +112,8 @@ def get_users_me(
 def get_user(
     user_id: int,
     session: Session = Depends(get_session),
-    current_user: models.User = Depends(users_api.get_current_active_user),
-) -> schemas.User:
+    current_user: User = Depends(users_api.get_current_active_user),
+) -> UserSchema:
     """it is route to get user based on given id.
 
         it raises HTTPException when user does not exist.
@@ -121,13 +121,13 @@ def get_user(
     Args:
         user_id (int): id of user
         session (Session): connection to database
-        current_user (models.User): model of current user, must be authorized!
+        current_user (User): model of current user, must be authorized!
 
     Raises:
         HTTPException: when user with given id does not exist
 
     Returns:
-        schemas.User: schema of user
+        UserSchema: schema of user
     """
     db_user = users_api.get_user(session=session, user_id=user_id)
 
@@ -143,7 +143,7 @@ def get_user(
 def post_token(
     session: Session = Depends(get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
-) -> schemas.Token:
+) -> Token:
     """it is route to get token for user.
 
         it tries to authenticate user based on form data (username, password).
@@ -153,27 +153,27 @@ def post_token(
         form_data (OAuth2PasswordRequestForm): form data with credentials (username, password)
 
     Returns:
-        schemas.Token: schema with token for given user
+        Token: schema with token for given user
     """
     return users_api.get_token(session=session, form_data=form_data)
 
 
 @router.put("/users/me")
 def update_user(
-    updated_user: schemas.UserCreate,
+    updated_user: UserCreate,
     session: Session = Depends(get_session),
-    current_user: models.User = Depends(users_api.get_current_active_user),
-) -> schemas.User:
+    current_user: User = Depends(users_api.get_current_active_user),
+) -> UserSchema:
     """it is route to update user (username, email) based on UserCreate schema.
 
 
     Args:
-        updated_user (schemas.UserCreate): schema to update user
+        updated_user (UserCreate): schema to update user
         session (Session): connection to database
-        current_user (models.User): model of current user, must be authorized!
+        current_user (User): model of current user, must be authorized!
 
     Returns:
-        schemas.User: schema of updated user
+        UserSchema: schema of updated user
     """
 
     return users_api.update_user(
@@ -183,16 +183,16 @@ def update_user(
 
 @router.patch("/users/password")
 def update_password(
-    password: schemas.PasswordUpdate,
+    password: PasswordUpdate,
     session: Session = Depends(get_session),
-    current_user: models.User = Depends(users_api.get_current_active_user),
+    current_user: User = Depends(users_api.get_current_active_user),
 ) -> Response:
     """it is route to update password for user.
 
     Args:
-        password (schemas.PasswordUpdate): schema to update password
+        password (PasswordUpdate): schema to update password
         session (Session): connection to database
-        current_user (models.User): model of current user, must be authorized!
+        current_user (User): model of current user, must be authorized!
 
     Returns:
         Response: response with 204 code when update is successful
@@ -207,13 +207,13 @@ def update_password(
 @router.delete("/users/me")
 def delete_user(
     session: Session = Depends(get_session),
-    current_user: models.User = Depends(users_api.get_current_active_user),
+    current_user: User = Depends(users_api.get_current_active_user),
 ) -> Response:
     """it is route to delete current user.
 
     Args:
         session (Session): connection to database
-        current_user (models.User): model of current user, must be authorized!
+        current_user (User): model of current user, must be authorized!
 
     Returns:
         Response: response with 204 code when update is successful

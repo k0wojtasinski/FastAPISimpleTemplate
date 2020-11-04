@@ -7,8 +7,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from server import app
+from server.models import Base
 from server.core.database import get_session
-from server.core.models import Base
 from server.core.utils import generate_user_create_dict, create_admin
 
 
@@ -18,14 +18,14 @@ def test_session():
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
 
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    testing_session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     Base.metadata.create_all(bind=engine)
 
-    session = TestingSessionLocal()
+    session = testing_session_local()
 
     try:
-        session = TestingSessionLocal()
+        session = testing_session_local()
         yield session
     finally:
         session.close()
@@ -37,13 +37,13 @@ def test_client() -> TestClient:
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
 
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    testing_session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     Base.metadata.create_all(bind=engine)
 
     def _override_get_session():
         try:
-            session = TestingSessionLocal()
+            session = testing_session_local()
             yield session
         finally:
             session.close()
@@ -55,7 +55,7 @@ def test_client() -> TestClient:
         username="admin",
         password="password",
         email="admin_user@example.com",
-        session=TestingSessionLocal(),
+        session=testing_session_local(),
     )
 
     return TestClient(app)

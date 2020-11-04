@@ -1,4 +1,4 @@
-""" module with all the pydantic schemas """
+""" module with all the users schemas """
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
@@ -17,7 +17,7 @@ class UserCreate(UserBase):
     password: str
 
 
-class User(UserBase):
+class UserSchema(UserBase):
     """ full User schema, to be mapped into User model. """
 
     id: int

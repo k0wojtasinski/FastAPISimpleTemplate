@@ -9,7 +9,7 @@ from jose import jwt
 from passlib.context import CryptContext
 
 from server.core.settings import settings
-from server.core import schemas
+from server.schemas.users import Token, TokenData, UserSchema
 
 
 SECRET_KEY = settings.secret_key
@@ -84,36 +84,36 @@ def create_access_token(
     return encoded_jwt
 
 
-def process_token(token: str = Depends(oauth2_scheme)) -> schemas.TokenData:
+def process_token(token: str = Depends(oauth2_scheme)) -> TokenData:
     """it decodes provided token and returns its content.
 
     Args:
         token (str): token provided in token (see oauth2_scheme for more info).
 
     Returns:
-        schemas.TokenData: token data in a friendly format.
+        TokenData: token data in a friendly format.
     """
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     username: str = payload.get("sub")
     exp: int = payload.get("exp")
 
-    return schemas.TokenData(username=username, exp=exp)
+    return TokenData(username=username, exp=exp)
 
 
-def get_token(user: schemas.User) -> schemas.Token:
+def get_token(user: UserSchema) -> Token:
     """gets token based on given user.
 
         It calls create_access_token.
 
     Args:
-        user (schemas.User): user to get token for
+        user (UserSchema): user to get token for
 
     Returns:
-        schemas.Token: desired token
+        Token: desired token
     """
     access_token_expires = timedelta(seconds=ACCESS_TOKEN_EXPIRES_SECONDS)
 
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return schemas.Token(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer")

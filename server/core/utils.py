@@ -4,7 +4,7 @@ from typing import Optional
 
 from faker import Faker
 
-from server.core.schemas import UserCreate
+from server.schemas.users import UserCreate
 from server.core.database import SessionLocal
 from server.apis.users import (
     create_admin_user,

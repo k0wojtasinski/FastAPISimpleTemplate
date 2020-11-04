@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from server.routes import users
 from server.core.database import engine
-from server.core.models import Base
+from server.models import Base
 from server.core.settings import settings
 from server.core.utils import create_admin
 
