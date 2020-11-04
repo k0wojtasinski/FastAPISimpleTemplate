@@ -85,7 +85,7 @@ def test_user_can_change_its_password(test_client, user_json):
     headers = get_auth_credentials(test_client, user_json)
 
     change_password = test_client.patch(
-        "/users/password", headers=headers, json={"password": "new_password"}
+        "/users/password/me", headers=headers, json={"password": "new_password"}
     )
 
     assert change_password.status_code == status.HTTP_204_NO_CONTENT

@@ -181,7 +181,7 @@ def update_user(
     )
 
 
-@router.patch("/users/password")
+@router.patch("/users/password/me")
 def update_password(
     password: PasswordUpdate,
     session: Session = Depends(get_session),
