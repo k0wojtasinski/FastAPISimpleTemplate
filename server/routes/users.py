@@ -136,7 +136,7 @@ def get_user(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    return db_user
+    return convert_user_to_schema(db_user)
 
 
 @router.post("/users/token/")
