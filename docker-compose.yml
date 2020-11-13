@@ -19,7 +19,7 @@ services:
       - DATABASE_PASSWORD=${DATABASE_PASSWORD}
       - BACKEND_DATABASE_CONNECTION_STRING=${BACKEND_DATABASE_CONNECTION_STRING}
   database:
-    image: postgres:13-alpine
+    image: postgres:12-alpine
     environment: 
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
       - POSTGRES_USER=${DATABASE_USER}
