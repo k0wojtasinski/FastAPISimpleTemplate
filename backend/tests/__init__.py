@@ -1,11 +1,18 @@
-import sys
 import os
+from pathlib import Path
+import sys
+
+from dotenv import load_dotenv
+
+# loading .env configuration for unit tests
+load_dotenv(Path("tests/test.env"))
+
+# loading server directory for unit tests
+sys.path.append(Path("../server"))
 
 from fastapi.testclient import TestClient
 
 from server.schemas.users import UserCreate
-
-sys.path.append(os.path.abspath("../server"))
 
 
 def get_auth_credentials(test_client: TestClient, user_schema: UserCreate) -> dict:
