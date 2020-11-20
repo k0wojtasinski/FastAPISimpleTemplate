@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     admin_password: Optional[str]
     admin_email: Optional[str]
     database_connection_string = "sqlite://"
+    timeout_in_seconds: Optional[int]
 
     class Config:
         """ extra configuration for BaseSettings """

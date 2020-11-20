@@ -1,5 +1,7 @@
 """ module with server """
 
+from time import sleep
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -28,3 +30,11 @@ if settings.admin_username:
         password=settings.admin_password,
         email=settings.admin_email,
     )
+
+
+@app.on_event("startup")
+def startup():
+    """ function that executes before starting up server """
+    if settings.timeout_in_seconds:
+        print(f"Waiting {settings.timeout_in_seconds} seconds")
+        sleep(settings.timeout_in_seconds)
