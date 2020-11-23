@@ -3,9 +3,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from retrying import retry
+
 from server.core.settings import settings
 
 CONNECTION_STRING = settings.database_connection_string
+MAX_TIMEOUT = settings.max_timeout_in_seconds
 
 
 def prepare_engine(database_url: str):
@@ -20,16 +23,21 @@ def prepare_engine(database_url: str):
     """
     if database_url == "sqlite://":
         return create_engine(
-            CONNECTION_STRING,
+            database_url,
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
         )
-    return create_engine(CONNECTION_STRING)
+    return create_engine(database_url)
+
+
+@retry(wait_exponential_multiplier=1000, wait_exponential_max=MAX_TIMEOUT)
+def prepare_local_session(engine):
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 engine = prepare_engine(CONNECTION_STRING)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = prepare_local_session(engine)
 
 
 def get_session():

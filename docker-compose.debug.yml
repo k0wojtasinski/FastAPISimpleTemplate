@@ -7,7 +7,7 @@ services:
       context: backend
       dockerfile: ./Dockerfile.debug
     ports:
-      - 8000:8000
+      - ${BACKEND_PORT}:${BACKEND_PORT}
     volumes: 
       - type: bind
         source: ./backend
@@ -25,7 +25,7 @@ services:
       - BACKEND_ADMIN_USERNAME=${BACKEND_ADMIN_USERNAME}
       - BACKEND_ADMIN_PASSWORD=${BACKEND_ADMIN_PASSWORD}
       - BACKEND_ADMIN_EMAIL=${BACKEND_ADMIN_EMAIL}
-      - BACKEND_TIMEOUT_IN_SECONDS=${BACKEND_TIMEOUT_IN_SECONDS}
+      - BACKEND_MAX_TIMEOUT_IN_SECONDS=${BACKEND_MAX_TIMEOUT_IN_SECONDS}
     depends_on:
       - "database" 
   database:

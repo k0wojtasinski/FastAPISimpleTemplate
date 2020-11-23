@@ -7,7 +7,7 @@ services:
       context: backend
       dockerfile: ./Dockerfile
     ports:
-      - 8000:8000
+      - ${BACKEND_PORT}:${BACKEND_PORT}
     environment:
       - BACKEND_PORT=${BACKEND_PORT}
       - BACKEND_HOST=${BACKEND_HOST}
@@ -21,6 +21,9 @@ services:
       - BACKEND_ADMIN_USERNAME=${BACKEND_ADMIN_USERNAME}
       - BACKEND_ADMIN_PASSWORD=${BACKEND_ADMIN_PASSWORD}
       - BACKEND_ADMIN_EMAIL=${BACKEND_ADMIN_EMAIL}
+      - BACKEND_MAX_TIMEOUT_IN_SECONDS=${BACKEND_MAX_TIMEOUT_IN_SECONDS}
+    depends_on:
+      - "database" 
   database:
     image: postgres:12-alpine
     environment: 
