@@ -19,12 +19,12 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
     - name: Lint with black
       run: |
         pip install black
-        black server/
-        black tests/
+        black backend/server/
+        black backend/tests/
     - name: Test with pytest
       run: |
-        pytest
+        cd backend && pytest

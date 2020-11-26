@@ -1,0 +1,37 @@
+version: '3.4'
+
+services:
+  backend:
+    image: stack-backend
+    build:
+      context: backend
+      dockerfile: ./Dockerfile
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    environment:
+      - BACKEND_PORT=${BACKEND_PORT}
+      - BACKEND_HOST=${BACKEND_HOST}
+      - BACKEND_DATABASE_CONNECTION_STRING=${BACKEND_DATABASE_CONNECTION_STRING}
+      - BACKEND_SECRET_KEY=${BACKEND_SECRET_KEY}
+      - BACKEND_CRYPO_ALGORITHM=${BACKEND_CRYPO_ALGORITHM}
+      - BACKEND_ACCESS_TOKEN_EXPIRE_SECONDS=${BACKEND_ACCESS_TOKEN_EXPIRE_SECONDS}
+      - BACKEND_CORS_ALLOW_ORIGINS=${BACKEND_CORS_ALLOW_ORIGINS}
+      - BACKEND_CORS_ALLOW_HEADERS=${BACKEND_CORS_ALLOW_HEADERS}
+      - BACKEND_CORS_ALLOW_METHODS=${BACKEND_CORS_ALLOW_METHODS}
+      - BACKEND_ADMIN_USERNAME=${BACKEND_ADMIN_USERNAME}
+      - BACKEND_ADMIN_PASSWORD=${BACKEND_ADMIN_PASSWORD}
+      - BACKEND_ADMIN_EMAIL=${BACKEND_ADMIN_EMAIL}
+      - BACKEND_MAX_TIMEOUT_IN_SECONDS=${BACKEND_MAX_TIMEOUT_IN_SECONDS}
+    depends_on:
+      - "database" 
+  database:
+    image: postgres:12-alpine
+    environment: 
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes: 
+      - type: bind
+        source: ./database/data
+        target: /var/lib/postgresql/data/pgdata
