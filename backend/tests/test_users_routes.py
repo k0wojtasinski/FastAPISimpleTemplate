@@ -3,7 +3,7 @@
 
 from fastapi import status
 
-from tests import get_auth_credentials
+from tests.conftest import get_auth_credentials
 
 
 def test_user_can_sign_up(test_client, user_json):

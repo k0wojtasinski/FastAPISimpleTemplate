@@ -11,6 +11,16 @@ from server.models import Base
 from server.core.database import get_session
 from server.core.utils import generate_user_create_dict, create_admin
 
+from server.schemas.users import UserCreate
+
+
+def get_auth_credentials(client: TestClient, user_schema: UserCreate) -> dict:
+    response = client.post(
+        "/users/token/",
+        {"username": user_schema["username"], "password": user_schema["password"]},
+    )
+    return {"Authorization": f'bearer {response.json()["access_token"]}'}
+
 
 @pytest.fixture
 def test_session():
