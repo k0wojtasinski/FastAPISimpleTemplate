@@ -31,7 +31,7 @@ class UserSchema(UserBase):
 
 
 class AccessToken(BaseModel):
-    """token schema.
+    """access token schema.
     Note that token is not saved into database."""
 
     access_token: str
@@ -39,11 +39,16 @@ class AccessToken(BaseModel):
 
 
 class RefreshToken(BaseModel):
+    """refresh token schema
+    Note that token is not saved into database."""
+
     refresh_token: str
     token_type: str
 
 
 class UserTokens(BaseModel):
+    """schema which contains both user tokens
+    (AccessToken and RefreshToken)"""
     access_token: AccessToken
     refresh_token: RefreshToken
 

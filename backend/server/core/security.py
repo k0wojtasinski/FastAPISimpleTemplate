@@ -130,7 +130,8 @@ def process_access_token(
     """it decodes provided access token and returns its content.
 
     Args:
-        access_token (str): access token provided by the client (see oauth2_scheme_access_token for more info).
+        access_token (str): access token provided by the client
+        (see oauth2_scheme_access_token for more info)
 
     Returns:
         TokenData: token data in a friendly format.
@@ -148,7 +149,8 @@ def process_refresh_token(
     """it decodes provided refresh token and returns its content.
 
     Args:
-        refresh_token (str): resfresh token provided by the client (see oauth2_scheme_refresh_token for more info).
+        refresh_token (str): resfresh token provided by the client
+        (see oauth2_scheme_refresh_token for more info)
 
     Returns:
         TokenData: token data in a friendly format.

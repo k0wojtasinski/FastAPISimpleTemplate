@@ -156,7 +156,9 @@ def post_tokens(
 
         it tries to authenticate user based on form data (username, password).
 
-        it sends refresh token as a cookie with httpOnly set to True (not available to client JS scripts)
+        it sends refresh token as a cookie with httpOnly set to True
+        (not available to client JS scripts)
+
         it sends access token as a standard JSON payload
 
     Args:
@@ -269,7 +271,19 @@ def logout_user(
 
 
 @router.post("/users/token/refresh")
-def use_refresh_token(request: Request, session: Session = Depends(get_session)):
+def use_refresh_token(request: Request, session: Session = Depends(get_session)) -> AccessToken:
+    """it is route to refresh access token based on refresh token from cookie
+
+    Args:
+        response (Response): object used to remove cookie
+        session (Session): connection to database
+
+    Raises:
+        security.CredentialsException: [description]
+
+    Returns:
+        AccessToken: desired token
+    """
     refresh_token = request.cookies.get("Authorization")
     if refresh_token:
         return users_api.get_access_token_from_refresh_token(

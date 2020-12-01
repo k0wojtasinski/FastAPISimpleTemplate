@@ -293,6 +293,18 @@ def get_current_admin_user(
 def get_access_token_from_refresh_token(
     refresh_token: str, session: Session = Depends(get_session)
 ) -> AccessToken:
+    """it gets access token from given access token
+
+    Args:
+        refresh_token (str): value of refresh token
+        session (Session, optional): [description]. Defaults to Depends(get_session).
+
+    Raises:
+        security.CredentialsException: when token is not valid
+
+    Returns:
+        AccessToken: desired token
+    """
     try:
         token_data = security.process_refresh_token(refresh_token)
         user = get_user_by_username(session, token_data.username)
