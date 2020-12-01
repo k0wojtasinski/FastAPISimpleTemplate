@@ -30,12 +30,22 @@ class UserSchema(UserBase):
         orm_mode = True
 
 
-class Token(BaseModel):
+class AccessToken(BaseModel):
     """token schema.
     Note that token is not saved into database."""
 
     access_token: str
     token_type: str
+
+
+class RefreshToken(BaseModel):
+    refresh_token: str
+    token_type: str
+
+
+class UserTokens(BaseModel):
+    access_token: AccessToken
+    refresh_token: RefreshToken
 
 
 class TokenData(BaseModel):

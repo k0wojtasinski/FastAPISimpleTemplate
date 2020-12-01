@@ -133,3 +133,13 @@ def test_user_can_delete_itself(test_client, user_json):
 
     assert len(test_client.get("/users", headers=headers).json()) == 2
     assert test_client.get("/users", headers=headers).json()[1]["id"] == 3
+
+
+def test_user_can_signout(test_client, user_json):
+    sign_up_user = test_client.post("/users/", json=user_json)
+    headers = get_auth_credentials(test_client, user_json)
+
+    sign_out_user = test_client.post("/users/logout", headers=headers)
+
+    assert 'Authorization=""' in sign_out_user.headers["set-cookie"]
+    assert not sign_out_user.cookies

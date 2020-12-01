@@ -1,5 +1,6 @@
 """ module with all the methods to work with User model """
 
+import logging
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -8,7 +9,13 @@ from sqlalchemy.orm import Session
 from jose import JWTError
 
 from server.models.users import User
-from server.schemas.users import PasswordUpdate, Token, UserBase, UserCreate
+from server.schemas.users import (
+    PasswordUpdate,
+    AccessToken,
+    UserTokens,
+    UserBase,
+    UserCreate,
+)
 from server.core import security
 from server.core.database import get_session
 
@@ -207,7 +214,7 @@ def authenticate_user(session: Session, username: str, password: str) -> User:
 
 def get_current_user(
     session: Session = Depends(get_session),
-    token: str = Depends(security.oauth2_scheme),
+    access_token: str = Depends(security.oauth2_scheme_access_token),
 ) -> User:
     """it gets user based on provided token.
 
@@ -223,7 +230,7 @@ def get_current_user(
     """
 
     try:
-        token_data = security.process_token(token)
+        token_data = security.process_access_token(access_token)
     except JWTError:
         raise security.CredentialsException(
             "Could not validate credentials"
@@ -283,10 +290,29 @@ def get_current_admin_user(
     return current_user
 
 
-def get_token(
+def get_access_token_from_refresh_token(
+    refresh_token: str, session: Session = Depends(get_session)
+) -> AccessToken:
+    try:
+        token_data = security.process_refresh_token(refresh_token)
+        user = get_user_by_username(session, token_data.username)
+    except JWTError:
+        raise security.CredentialsException(
+            "Could not validate credentials"
+        ) from JWTError
+
+    user = get_user_by_username(session, username=token_data.username)
+
+    if not user:
+        raise security.CredentialsException("Could not validate credentials")
+
+    return security.get_access_token(user)
+
+
+def get_tokens(
     session: Session, form_data: OAuth2PasswordRequestForm = Depends()
-) -> Token:
-    """it gets token based on given form data with username and password.
+) -> UserTokens:
+    """it gets tokens based on given form data with username and password.
 
         it will try to sign in user based on provided credentials.
 
@@ -309,4 +335,7 @@ def get_token(
     if not user:
         raise security.CredentialsException("Incorrect username or password")
 
-    return security.get_token(user)
+    return UserTokens(
+        access_token=security.get_access_token(user),
+        refresh_token=security.get_refresh_token(user),
+    )

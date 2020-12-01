@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     secret_key: str
     crypto_algorithm = "HS256"
     access_token_expire_seconds: int
+    refresh_token_expire_seconds: int
     cors_allow_origins: str
     cors_allow_headers: str
     cors_allow_methods: str

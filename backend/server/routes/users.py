@@ -1,14 +1,21 @@
 """ module with all the User endpoints """
 
-from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.orm import Session
 
-from server.models.users import User
-from server.schemas.users import PasswordUpdate, Token, UserSchema, UserCreate
+from server.apis import users as users_api
 from server.core import security
 from server.core.database import get_session
-from server.apis import users as users_api
+from server.core.settings import settings
+from server.models.users import User
+from server.schemas.users import (
+    PasswordUpdate,
+    AccessToken,
+    RefreshToken,
+    UserSchema,
+    UserCreate,
+)
 
 router = APIRouter()
 
@@ -140,22 +147,38 @@ def get_user(
 
 
 @router.post("/users/token/")
-def post_token(
+def post_tokens(
+    response: Response,
     session: Session = Depends(get_session),
     form_data: OAuth2PasswordRequestForm = Depends(),
-) -> Token:
-    """it is route to get token for user.
+) -> AccessToken:
+    """it is route to get access token and refresh token for user.
 
         it tries to authenticate user based on form data (username, password).
+
+        it sends refresh token as a cookie with httpOnly set to True (not available to client JS scripts)
+        it sends access token as a standard JSON payload
 
     Args:
         session (Session): connection to database
         form_data (OAuth2PasswordRequestForm): form data with credentials (username, password)
 
     Returns:
-        Token: schema with token for given user
+        Token: schema with access token for given user
     """
-    return users_api.get_token(session=session, form_data=form_data)
+    tokens = users_api.get_tokens(session=session, form_data=form_data)
+
+    access_token = tokens.access_token
+    refresh_token = tokens.refresh_token
+
+    response.set_cookie(
+        "Authorization",
+        refresh_token.refresh_token,
+        expires=settings.refresh_token_expire_seconds,
+        httponly=True,
+    )
+
+    return access_token
 
 
 @router.put("/users/me")
@@ -221,3 +244,35 @@ def delete_user(
     users_api.delete_user(session=session, current_user=current_user)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/users/logout")
+def logout_user(
+    response: Response,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(users_api.get_current_active_user),
+) -> dict:
+    """it is route to logout user, by removing refresh token cookie from client
+
+    access token should be removed by client
+
+    Args:
+        response (Response): object used to remove cookie
+        session (Session): connection to database
+        current_user (User): model of current user, must be authorized!
+
+    Returns:
+        dict: empty response
+    """
+    response.delete_cookie("Authorization")
+    return {}
+
+
+@router.post("/users/token/refresh")
+def use_refresh_token(request: Request, session: Session = Depends(get_session)):
+    refresh_token = request.cookies.get("Authorization")
+    if refresh_token:
+        return users_api.get_access_token_from_refresh_token(
+            request.cookies.get("Authorization"), session
+        )
+    raise security.CredentialsException("Refresh token is not present")
