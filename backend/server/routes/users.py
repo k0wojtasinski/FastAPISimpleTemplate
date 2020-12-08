@@ -271,7 +271,9 @@ def logout_user(
 
 
 @router.post("/users/token/refresh")
-def use_refresh_token(request: Request, session: Session = Depends(get_session)) -> AccessToken:
+def use_refresh_token(
+    request: Request, session: Session = Depends(get_session)
+) -> AccessToken:
     """it is route to refresh access token based on refresh token from cookie
 
     Args:
@@ -279,7 +281,7 @@ def use_refresh_token(request: Request, session: Session = Depends(get_session))
         session (Session): connection to database
 
     Raises:
-        security.CredentialsException: [description]
+        security.CredentialsException: when refresh token is not present or it is not valid
 
     Returns:
         AccessToken: desired token

@@ -49,6 +49,7 @@ class RefreshToken(BaseModel):
 class UserTokens(BaseModel):
     """schema which contains both user tokens
     (AccessToken and RefreshToken)"""
+
     access_token: AccessToken
     refresh_token: RefreshToken
 

@@ -297,7 +297,7 @@ def get_access_token_from_refresh_token(
 
     Args:
         refresh_token (str): value of refresh token
-        session (Session, optional): [description]. Defaults to Depends(get_session).
+        session (Session): connection to database
 
     Raises:
         security.CredentialsException: when token is not valid
