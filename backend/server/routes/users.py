@@ -52,21 +52,7 @@ def post_user(user: UserCreate, session: Session = Depends(get_session)) -> User
     Returns:
         UserSchema: schema of user
     """
-    db_user = users_api.get_user_by_username(session=session, username=user.username)
-
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
-        )
-
-    db_user = users_api.get_user_by_email(session=session, email=user.email)
-
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
-        )
-
+    users_api.check_if_user_exists(session, user)
     user = users_api.create_user(session=session, user=user)
 
     return convert_user_to_schema(user)

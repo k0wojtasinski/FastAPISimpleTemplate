@@ -59,6 +59,29 @@ def get_user_by_email(session: Session, email: str) -> Optional[User]:
     return session.query(User).filter(User.email == email).first()
 
 
+def check_if_user_exists(session: Session, user: UserBase) -> None:
+    """it raises HTTPException when given user exists, does not return any value
+
+    Args:
+        session (Session): connection to database
+        user (UserBase): user to be verified
+
+    Raises:
+        HTTPException: when user with given username or email already exists
+    """
+    if get_user_by_username(session, user.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered",
+        )
+
+    if get_user_by_email(session, user.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+
+
 def get_users(session: Session, skip: int = 0, limit: int = 100) -> list[User]:
     """it gets list of users, supports skip and limit parameters.
 

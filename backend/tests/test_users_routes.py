@@ -44,11 +44,16 @@ def test_user_cannot_sign_up_with_already_used_email(test_client, user_json):
 def test_user_can_sign_in(test_client, user_json):
     test_client.post("/users/", json=user_json)
 
-    headers = get_auth_credentials(test_client, user_json)
+    sign_in_request = test_client.post(
+        "/users/token/",
+        {"username": user_json["username"], "password": user_json["password"]},
+    )
+    headers = {"Authorization": f'bearer {sign_in_request.json()["access_token"]}'}
 
     check_current_user = test_client.get("/users/me", headers=headers)
     check_current_user_response = check_current_user.json()
 
+    assert "Authorization=" in sign_in_request.headers.get("set-cookie")
     assert check_current_user.status_code == status.HTTP_200_OK
     assert check_current_user_response["username"] == user_json["username"]
     assert check_current_user_response["email"] == user_json["email"]
@@ -136,10 +141,36 @@ def test_user_can_delete_itself(test_client, user_json):
 
 
 def test_user_can_signout(test_client, user_json):
-    sign_up_user = test_client.post("/users/", json=user_json)
+    test_client.post("/users/", json=user_json)
+
     headers = get_auth_credentials(test_client, user_json)
 
     sign_out_user = test_client.post("/users/logout", headers=headers)
 
     assert 'Authorization=""' in sign_out_user.headers["set-cookie"]
     assert not sign_out_user.cookies
+
+
+def test_user_can_use_refresh_token(test_client, user_json):
+    test_client.post("/users/", json=user_json)
+
+    sign_in_request = test_client.post(
+        "/users/token/",
+        {"username": user_json["username"], "password": user_json["password"]},
+    )
+
+    refresh_token = sign_in_request.headers["set-cookie"].split("=", 1)
+
+    refresh_token_request = test_client.post(
+        "/users/token/refresh", headers={refresh_token[0]: refresh_token[1]}
+    )
+    access_token = refresh_token_request.json()
+
+    check_current_user_request = test_client.get(
+        "/users/me",
+        headers={
+            "Authorization": f"{access_token.get('token_type')} {access_token.get('access_token')}"
+        },
+    )
+
+    assert check_current_user_request.status_code == status.HTTP_200_OK
