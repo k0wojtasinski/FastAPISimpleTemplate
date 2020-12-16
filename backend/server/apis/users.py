@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import JWTError
 
+from server.apis import crud
 from server.models.users import User
 from server.schemas.users import PasswordUpdate, Token, UserBase, UserCreate
 from server.core import security
@@ -23,7 +24,7 @@ def get_user(session: Session, user_id: int) -> Optional[User]:
     Returns:
         User: model with given id
     """
-    return session.query(User).filter(User.id == user_id).first()
+    return crud.get_first_model(session, User, User.id == user_id)
 
 
 def get_user_by_username(session: Session, username: str) -> Optional[User]:
@@ -36,7 +37,7 @@ def get_user_by_username(session: Session, username: str) -> Optional[User]:
     Returns:
         User: model with given username
     """
-    return session.query(User).filter(User.username == username).first()
+    return crud.get_first_model(session, User, User.username == username)
 
 
 def get_user_by_email(session: Session, email: str) -> Optional[User]:
@@ -49,7 +50,7 @@ def get_user_by_email(session: Session, email: str) -> Optional[User]:
     Returns:
         User: model with given email
     """
-    return session.query(User).filter(User.email == email).first()
+    return crud.get_first_model(session, User, User.email == email)
 
 
 def get_users(session: Session, skip: int = 0, limit: int = 100) -> list[User]:
@@ -63,7 +64,7 @@ def get_users(session: Session, skip: int = 0, limit: int = 100) -> list[User]:
     Returns:
         list[User]: list of users
     """
-    return session.query(User).offset(skip).limit(limit).all()
+    return crud.get_all_models(session, User, skip, limit)
 
 
 def create_user(session: Session, user: UserCreate) -> User:
@@ -106,10 +107,7 @@ def create_admin_user(session: Session, user: UserCreate) -> User:
     user = create_user(session, user)
     user.is_admin = True
 
-    session.commit()
-    session.refresh(user)
-
-    return user
+    return crud.update_model(session, user)
 
 
 def update_user(
@@ -131,10 +129,7 @@ def update_user(
     current_user.username = updated_user.username
     current_user.email = updated_user.email
 
-    session.commit()
-    session.refresh(current_user)
-
-    return current_user
+    return crud.update_model(session, current_user)
 
 
 def update_password(
@@ -166,10 +161,7 @@ def update_password(
 
     current_user.hashed_password = security.get_password_hash(password)
 
-    session.commit()
-    session.refresh(current_user)
-
-    return current_user
+    return crud.update_model(session, current_user)
 
 
 def delete_user(session: Session, current_user: User):
@@ -179,8 +171,7 @@ def delete_user(session: Session, current_user: User):
         session (Session): connection to database
         current_user (User): provided model
     """
-    session.delete(current_user)
-    session.commit()
+    crud.delete_model(session, current_user)
 
 
 def authenticate_user(session: Session, username: str, password: str) -> User:
